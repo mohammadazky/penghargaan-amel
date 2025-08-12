@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Penghargaan Rahasia</title>
+<style>
+  body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow-x: hidden;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  #inputSection {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+  }
+  input, button {
+    padding: 12px 20px;
+    margin: 10px;
+    font-size: 1.1em;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+  }
+  input {
+    width: 280px;
+    max-width: 90vw;
+  }
+  button {
+    background: linear-gradient(45deg, #ff7eb3, #ff758c);
+    color: white;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    border: none;
+  }
+  button:hover {
+    background: linear-gradient(45deg, #ff5680, #ff3a64);
+  }
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70vh;
+    z-index: 0;
+    pointer-events: none;
+    filter: drop-shadow(0 0 6px #fff);
+    background: transparent;
+  }
+  #message {
+    display: none;
+    margin-top: 20px;
+    z-index: 10;
+  }
+  #message h1 {
+    font-size: 3em;
+    margin-bottom: 0.3em;
+    background: linear-gradient(45deg, #ff7eb3, #ff758c, #ff9a9e, #fad0c4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 2s ease-in-out forwards;
+  }
+  #message h2 {
+    font-size: 1.7em;
+    margin-bottom: 0.8em;
+    background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fadeIn 2s ease-in-out 0.5s forwards;
+  }
+  #message p {
+    font-size: 1.3em;
+    color: #f8d7ff;
+    max-width: 90vw;
+    margin-left: auto;
+    margin-right: auto;
+    animation: fadeIn 3s ease-in-out 1s forwards;
+  }
+  @keyframes fadeIn {
+    0% {opacity: 0; transform: scale(0.8);}
+    100% {opacity: 1; transform: scale(1);}
+  }
+</style>
+</head>
+<body>
+
+<div id="inputSection">
+  <h1>Ketik Nama Untuk Membuka Penghargaan</h1>
+  <input type="text" id="userInput" placeholder="Ketik nama di sini..." />
+  <button onclick="showMessage()">Lihat Penghargaan</button>
+</div>
+
+<canvas id="stars"></canvas>
+
+<div id="message">
+  <h1>Hai Amelia Puspita Sari</h1>
+  <h2>Ini penghargaan dari seseorang rahasia sang langit</h2>
+  <p>Semangat terus sampai langit bisa memilikimu</p>
+</div>
+
+<audio id="bgMusic" src="musik_azki.mp3" preload="auto"></audio>
+
+<script>
+function showMessage() {
+  const inputSection = document.getElementById("inputSection");
+  const message = document.getElementById("message");
+  const namaInput = document.getElementById("userInput");
+  const nama = namaInput.value.trim();
+
+  if (!nama) {
+    alert("Tolong ketik nama dulu ya!");
+    namaInput.focus();
+    return;
+  }
+
+  message.querySelector('h1').textContent = `Hai ${nama}`;
+
+  inputSection.style.display = "none";
+  message.style.display = "block";
+
+  startStars();
+
+  const music = document.getElementById("bgMusic");
+  music.play().catch(() => {
+    console.log("Autoplay dicegah browser, user harus klik tombol dulu");
+  });
+}
+
+function drawStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+  let rot = Math.PI / 2 * 3;
+  let x = cx;
+  let y = cy;
+  let step = Math.PI / spikes;
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerRadius);
+  for(let i = 0; i < spikes; i++){
+    x = cx + Math.cos(rot) * outerRadius;
+    y = cy + Math.sin(rot) * outerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+
+    x = cx + Math.cos(rot) * innerRadius;
+    y = cy + Math.sin(rot) * innerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+  }
+  ctx.lineTo(cx, cy - outerRadius);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 6;
+  ctx.fill();
+}
+
+function startStars() {
+  const canvas = document.getElementById("stars");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 0.7;
+
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Buat banyak bintang dengan properti acak
+  const stars = [];
+  const numStars = 200;
+
+  for(let i = 0; i < numStars; i++){
+    stars.push({
+      angle: Math.random() * 2 * Math.PI,
+      radius: 5 + Math.random() * 4,
+      distance: 50 + Math.random() * (Math.min(centerX, centerY) - 60),
+      speed: 0.002 + Math.random() * 0.006,
+      hue: Math.random() * 360,
+      sizeRatio: 0.5 + Math.random()
+    });
+  }
+
+  function animate(){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    stars.forEach(star => {
+      star.angle += star.speed;
+      const x = centerX + Math.cos(star.angle) * star.distance;
+      const y = centerY + Math.sin(star.angle) * star.distance;
+      const color = `hsl(${star.hue}, 90%, 75%)`;
+      drawStar(ctx, x, y, 5, star.radius * star.sizeRatio, star.radius * star.sizeRatio / 2.5, color);
+    });
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
+}
+
+window.addEventListener("resize", () => {
+  const canvas = document.getElementById("stars");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight * 0.7;
+});
+</script>
+
+</body>
+</html>
